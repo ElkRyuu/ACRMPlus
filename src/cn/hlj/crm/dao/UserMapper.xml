@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="cn.hlj.crm.dao.UserMapper">
+	<sql id="userConditions">
+		<where>
+			<if test="name !=null and name !=''">
+				name LIKE #{name}
+			</if>
+			<if test="enabled !=null and enabled !=''">
+				AND enabled LIKE #{enabled}
+			</if>
+		</where>
+	</sql>
+
+	<select id="getTotalElementsWithConditions" parameterType="map" resultType="_long">
+		SELECT count(id)
+			FROM users
+			<include refid="userConditions"/>			
+	</select>
+	
+	<select id="getContentWithConditions" parameterType="map" resultType="cn.hlj.crm.entity.User">
+		SELECT * 
+			FROM (
+				SELECT rownum rn,id,name,enabled
+					FROM users
+					<include refid="userConditions"/>
+			) t
+			<![CDATA[
+			WHERE t.rn>=#{firstIndex} AND t.rn<#{endIndex}
+			]]>
+	</select>
+	
+	<resultMap type="cn.hlj.crm.entity.User" id="userMap">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="password" property="password"/>
+		<result column="enabled" property="enabled"/>
+		<result column="salt" property="salt"/>
+		
+		<result column="role.name" property="role.name"/>
+		
+		<collection property="role.authorities" ofType="cn.hlj.crm.entity.Authority">
+			<id column="authority_id" property="id"/>
+			<result column="authority_name" property="name"/>
+			<result column="authority_displayName" property="displayName"/>
+			<result column="authority_url" property="url"/>
+			
+			<result column="pa_id" property="parentAuthority.id"/>
+			<result column="pa_displayName" property="parentAuthority.displayName"/>
+		</collection>		
+	</resultMap>
+	
+	<select id="getByName" parameterType="string" resultMap="userMap">
+		SELECT u.id,u.name,password,u.enabled,salt,r.name as "role.name",
+			a.id as "authority_id",a.name as "authority_name",a.display_name as "authority_displayName",a.url as "authority_url",
+			pa.id as "pa_id",pa.display_name as "pa_displayName"
+			FROM users u 
+			LEFT OUTER JOIN roles r ON u.role_id=r.id
+			LEFT OUTER JOIN role_authority ra ON r.id=ra.role_id
+			LEFT OUTER JOIN authorities a ON ra.authority_id=a.id
+			LEFT OUTER JOIN authorities pa ON a.parent_authority_id=pa.id
+			WHERE u.name=#{name}
+	</select>
+</mapper>

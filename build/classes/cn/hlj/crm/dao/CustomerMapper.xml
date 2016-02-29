@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="cn.hlj.crm.dao.CustomerMapper">
+	<insert id="save" parameterType="cn.hlj.crm.entity.Customer">
+		<selectKey order="BEFORE" keyProperty="id" resultType="long">
+			SELECT crm_seq.nextval FROM dual
+		</selectKey>
+		INSERT INTO customers(id,name,no,state)
+			VALUES(#{id},#{name},#{no},#{state})
+	</insert>
+	
+	<sql id="customerConditions">
+		<where>
+			<if test="name != null and name != '' ">
+				c.name LIKE #{name}
+			</if>
+			<if test="region != null and region != ''">
+				region = #{region}
+			</if>
+			<if test="managerName != null and managerName != ''">
+				m.name LIKE #{managerName}
+			</if>
+			<if test="level != null and level != ''">
+				customer_level = #{level}
+			</if>
+			<if test="state != null and state != ''">
+				state = #{state}
+			</if>
+		</where>
+	</sql>
+	
+	<select id="getTotalElements" parameterType="map" resultType="_long">
+		SELECT count(*)
+			FROM (
+				SELECT c.id
+					FROM customers c
+					LEFT OUTER JOIN contacts m
+						ON c.manager_id=m.id
+					<include refid="customerConditions"/>
+			)
+	</select>
+	
+	<select id="getContent" parameterType="map" resultType="cn.hlj.crm.entity.Customer">
+		SELECT *
+			FROM (
+				SELECT rownum rn,c.id,no,c.name,region,m.name "manager.name",customer_level "level",state
+					FROM customers c
+					LEFT OUTER JOIN contacts m
+						ON c.manager_id=m.id
+					<include refid="customerConditions"/>
+			) t
+			<![CDATA[
+			WHERE t.rn>=#{firstIndex} AND t.rn<#{endIndex}
+			]]>
+	</select>
+	
+	<select id="get" parameterType="long" resultType="cn.hlj.crm.entity.Customer">
+		SELECT c.id,no,c.name,region,m.id "manager.id",m.name "manager.name",customer_level "level",state,satify,credit,
+			   address,zip,c.tel,fax,websit,
+			   licence_no,chief,bankroll,turnover,bank,bank_account,local_tax_no,national_tax_no
+			FROM customers c
+			LEFT OUTER JOIN contacts m
+				ON c.manager_id=m.id
+			WHERE c.id=#{id}
+	</select>
+	
+	<update id="update" parameterType="cn.hlj.crm.entity.Customer">
+		UPDATE customers
+			<set>
+				<if test="name != null and name != ''">name=#{name},</if>
+				<if test="region != null and region != ''">region=#{region},</if>
+				<if test="manager != null">
+					<if test="manager.id != null">
+						manager_id=#{manager.id},
+					</if>
+				</if>
+				<if test="level !=null and level != ''">
+					customer_level=#{level},
+				</if>
+				<if test="state != null and state != ''">
+					state=#{state},
+				</if>
+				<if test="satify != null and satify != ''">
+					satify=#{satify},
+				</if>
+				<if test="credit != null and credit != ''">
+					credit=#{credit},
+				</if>
+				<if test="address != null and address != ''">
+					address=#{address},
+				</if>
+				<if test="zip != null and zip != ''">
+					zip=#{zip},
+				</if>
+				<if test="tel != null and tel != ''">
+					tel=#{tel},
+				</if>
+				<if test="fax != null and fax != ''">
+					fax=#{fax},
+				</if>
+				<if test="websit != null and websit != ''">
+					websit=#{websit},
+				</if>
+				<if test="licenceNo != null and licenceNo != ''">
+					licence_no=#{licenceNo},
+				</if>
+				<if test="chief != null and chief != ''">
+					chief=#{chief},
+				</if>
+				<if test="bankroll != null">
+					bankroll=#{bankroll},
+				</if>
+				<if test="turnover != null">
+					turnover=#{turnover},
+				</if>
+				<if test="bank != null and bank != ''">
+					bank=#{bank},
+				</if>
+				<if test="bankAccount != null and bankAccount != ''">
+					bank_account=#{bankAccount},
+				</if>
+				<if test="localTaxNo != null and localTaxNo != ''">
+					local_tax_no=#{localTaxNo},
+				</if>
+				<if test="nationalTaxNo != null and nationalTaxNo != ''">
+					national_tax_no=#{nationalTaxNo}
+				</if>
+			</set>
+			WHERE id=#{id}
+	</update>
+</mapper>

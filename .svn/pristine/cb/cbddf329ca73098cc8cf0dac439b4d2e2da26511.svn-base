@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="cn.hlj.crm.dao.SalesChanceMapper">
+	<sql id="chanceConditions">
+		<where>
+			<if test="custName !=null and custName !=''">
+				cust_name LIKE #{custName}
+			</if>
+			<if test="title !=null and title !=''">
+				AND title LIKE #{title}
+			</if>
+			<if test="contact !=null and contact !=''">
+				AND contact LIKE #{contact}
+			</if>
+		</where>
+	</sql>
+
+	<select id="getTotalElementsWithConditions" parameterType="map" resultType="_long">
+		SELECT count(id)
+			FROM sales_chances
+			<include refid="chanceConditions"/>			
+	</select>
+	
+	<select id="getContentWithConditions" parameterType="map" resultType="cn.hlj.crm.entity.SalesChance">
+		SELECT * 
+			FROM (
+				SELECT rownum rn,id,contact,contact_tel,create_date,cust_name,title 
+					FROM sales_chances
+					<include refid="chanceConditions"/>
+			) t
+			<![CDATA[
+			WHERE t.rn>=#{firstIndex} AND t.rn<#{endIndex}
+			]]>
+	</select>
+</mapper>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="cn.hlj.crm.dao.CustomerDrainMapper">
+	
+	<sql id="customerDrainConditions">
+		<where>
+			<if test="customerName != null and customerName != ''">c.name LIKE #{customerName}</if>
+			<if test="managerName != null and managerName != ''">m.name LIKE #{managerName}</if>
+		</where>
+	</sql>
+	
+	<select id="getTotalElements" parameterType="map" resultType="_long">
+		SELECT count(cd.id)
+			FROM customer_drains cd
+			LEFT OUTER JOIN customers c
+				ON cd.customer_id=c.id
+			LEFT OUTER JOIN contacts m
+				ON c.manager_id=m.id
+			<include refid="customerDrainConditions"/>
+	</select>
+	
+	<select id="getContent" parameterType="map" resultType="cn.hlj.crm.entity.CustomerDrain">
+		SELECT *
+			FROM (
+				SELECT rownum rn,cd.id,c.name "customer.name",m.name "customer.manager.name",last_order_date,
+				   	   drain_date,reason,status
+					FROM customer_drains cd
+					LEFT OUTER JOIN customers c
+						ON cd.customer_id=c.id
+					LEFT OUTER JOIN contacts m
+						ON c.manager_id=m.id
+					<include refid="customerDrainConditions"/>
+			) t
+			<![CDATA[
+			WHERE t.rn>=#{firstIndex} AND t.rn<#{endIndex}
+			]]>
+	</select>
+	
+	<select id="getById" parameterType="long" resultType="cn.hlj.crm.entity.CustomerDrain">
+		SELECT cd.id,c.name "customer.name",m.name "customer.manager.name",last_order_date,delay,cd.customer_id "customer.id"
+			FROM customer_drains cd
+				LEFT OUTER JOIN customers c
+					ON cd.customer_id=c.id
+				LEFT OUTER JOIN contacts m
+					ON c.manager_id=m.id
+			WHERE cd.id=#{id}					
+	</select>
+	
+	<update id="updateDrain" parameterType="cn.hlj.crm.entity.CustomerDrain">
+		UPDATE customer_drains
+			<set>
+				<if test="delay != null and delay != ''">delay=#{delay},</if>
+				<if test="drainDate != null">drain_date=#{drainDate},</if>
+				<if test="reason != null and reason != ''">reason=#{reason},</if>
+				<if test="status != null and status != ''">status=#{status}</if>
+			</set>
+			WHERE id=#{id}
+	</update>
+</mapper>

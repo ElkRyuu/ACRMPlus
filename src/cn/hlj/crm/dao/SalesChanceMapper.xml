@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="cn.hlj.crm.dao.SalesChanceMapper">
+	<sql id="chanceConditions">
+		<where>
+			<if test="custName !=null and custName !=''">
+				cust_name LIKE #{custName}
+			</if>
+			<if test="title !=null and title !=''">
+				AND title LIKE #{title}
+			</if>
+			<if test="contact !=null and contact !=''">
+				AND contact LIKE #{contact}
+			</if>
+			<if test="status !=null and status !=''">
+				AND status!=#{status}
+			</if>
+			<if test="designeeId != null and designeeId !=''">
+				AND designee_id=#{designeeId}
+			</if>
+		</where>
+	</sql>
+
+	<select id="getTotalElementsWithConditions" parameterType="map" resultType="_long">
+		SELECT count(id)
+			FROM sales_chances
+			<include refid="chanceConditions"/>			
+	</select>
+	
+	<select id="getContentWithConditions" parameterType="map" resultType="cn.hlj.crm.entity.SalesChance">
+		SELECT * 
+			FROM (
+				SELECT rownum rn,id,contact,contact_tel,create_date,cust_name,title 
+					<if test="status !=null and status !=''">
+						,status
+					</if>
+					FROM sales_chances
+					<include refid="chanceConditions"/>
+			) t
+			<![CDATA[
+			WHERE t.rn>=#{firstIndex} AND t.rn<#{endIndex}
+			]]>
+	</select>
+	
+	<update id="update" parameterType="cn.hlj.crm.entity.SalesChance">
+		UPDATE sales_chances
+			<set>
+				<if test="source != null and source !=''">source=#{source},</if>
+				<if test="custName != null and custName !=''">cust_name=#{custName},</if>
+				<if test="rate != null and rate !=''">rate=#{rate},</if>
+				<if test="title != null and title !=''">title=#{title},</if>
+				<if test="contact != null and contact !=''">contact=#{contact},</if>
+				<if test="contactTel != null and contactTel !=''">contact_tel=#{contactTel},</if>
+				<if test="description != null and description !=''">description=#{description},</if>
+				<!-- <if test="designee.id != null and designee.id !=''">designee_id=#{designee.id},</if> -->
+				<if test="designee != null">
+					<if test="designee.id != null">
+						designee_id=#{designee.id},
+					</if>
+				</if>
+				<if test="designeeDate != null and designeeDate !=''">designee_date=#{designeeDate},status=2</if>
+				<if test="status != null and status !=''">status=#{status}</if>
+			</set>
+			WHERE id=#{id}
+	</update>
+	
+	<resultMap type="cn.hlj.crm.entity.SalesChance" id="withPlans">
+		<id column="id" property="id"/>
+		<result column="source" property="source"/>
+		<result column="cust_name" property="custName"/>
+		<result column="rate" property="rate"/>
+		<result column="title" property="title"/>
+		<result column="contact" property="contact"/>
+		<result column="contact_tel" property="contactTel"/>
+		<result column="description" property="description"/>
+		
+		<result column="createBy.name" property="createBy.name"/>
+		
+		<result column="create_date" property="createDate"/>
+		
+		<result column="designee.name" property="designee.name"/>
+	
+		<collection property="salesPlans" ofType="cn.hlj.crm.entity.SalesPlan" columnPrefix="p_">
+			<id column="id" property="id"/>
+			<result column="plan_date" property="date"/>
+			<result column="todo" property="todo"/>
+			<result column="plan_result" property="result"/>
+		</collection>		
+	</resultMap>
+	
+	<select id="getWithPlans" resultMap="withPlans">
+		SELECT s.id,source,cust_name,rate,title,contact,contact_tel,description,
+			   c.name as "createBy.name",create_date,d.name as "designee.name",
+			   p.plan_date as "p_plan_date",p.todo as "p_todo",p.plan_result as "p_plan_result"
+			   FROM sales_chances s
+			   LEFT OUTER JOIN users c
+			   	ON s.created_user_id=c.id
+			   LEFT OUTER JOIN users d
+			   	ON s.designee_id=d.id
+			   LEFT OUTER JOIN sales_plan p
+			   	ON p.chance_id=s.id
+			   WHERE s.id=#{id}
+			   ORDER BY p.id
+	</select>
+</mapper>

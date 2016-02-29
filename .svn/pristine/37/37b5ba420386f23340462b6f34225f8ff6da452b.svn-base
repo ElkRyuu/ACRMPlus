@@ -1,0 +1,95 @@
+package cn.hlj.crm.test;
+
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import cn.hlj.crm.entity.Role;
+import cn.hlj.crm.entity.SalesChance;
+import cn.hlj.crm.entity.User;
+import cn.hlj.crm.orm.Page;
+import cn.hlj.crm.service.RoleService;
+import cn.hlj.crm.service.SalesChanceService;
+import cn.hlj.crm.service.UserService;
+
+public class ApplicationContextTest {
+
+	private ApplicationContext ctx = null;
+	private UserService userService = null;
+	private SalesChanceService salesChanceService = null;
+	private RoleService roleService = null;
+
+	@Before
+	public void init() {
+		ctx = new ClassPathXmlApplicationContext("applicationContext.xml");
+		userService = ctx.getBean(UserService.class);
+		salesChanceService = ctx.getBean(SalesChanceService.class);
+		roleService = ctx.getBean(RoleService.class);
+	}
+
+	@Test
+	public void testDataSource() throws SQLException {
+		DataSource dataSource = ctx.getBean(DataSource.class);
+		System.out.println(dataSource.getConnection());
+	}
+
+	@Test
+	public void testLogin() {
+		User user = userService.login("bcde", "4f6ed9e4ab25a6dac05933a8a0c5822ada8177e5");
+		System.out.println(user);
+	}
+
+	@Test
+	public void testGetPage() {
+		Page<SalesChance> page = new Page<>();
+		page.setPageNo(1);
+		page.setPageSize(2);
+
+		page = salesChanceService.getPage(page);
+
+		System.out.println(page.getTotalElements());
+		System.out.println(page.getContent());
+	}
+
+	@Test
+	public void testUserGetPage() {
+		Page<User> page = new Page<>();
+		page.setPageNo(1);
+		page.setPageSize(2);
+
+		page = userService.getPage(page);
+
+		System.out.println(page.getTotalElements());
+		System.out.println(page.getContent());
+	}
+
+	@Test
+	public void testRoleGetAll() {
+		List<Role> list = roleService.getAll();
+		for (Role role : list) {
+			System.out.println(role.getId() + "--" + role.getDescription() + "--" + role.getName());
+		}
+	}
+
+	@Test
+	public void testUserGet() {
+		User user = userService.get(21L);
+		System.out.println(user.getName());
+		System.out.println(user.getRole().getId());
+	}
+
+	@Test
+	public void testSalesChanceGet() {
+		SalesChance chance = salesChanceService.get(1L);
+
+		System.out.println(chance.getSource());
+		System.out.println(chance.getCreateBy().getName());
+		System.out.println(chance.getCreateBy().getRole().getName());
+	}
+}

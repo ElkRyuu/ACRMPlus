@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	<bean id="cacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+		<property name="cacheManagerConfigFile" value="classpath:ehcache-shiro.xml" />
+	</bean>
+	
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="cacheManager" ref="cacheManager" />
+		<property name="realm" ref="realm" />
+	</bean>
+	
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+	
+	<!--  
+	<bean id="filterChainDefinitionMap" factory-bean="filterChainDefinitionMapBuilder" factory-method="buildFilterChainDefinitionMap" />
+	-->
+	
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<property name="securityManager" ref="securityManager" />
+		<property name="loginUrl" value="/index.jsp" />
+		<property name="unauthorizedUrl" value="/unauthorized" />
+		
+		<!-- 可以使用实例工厂方法的方式为 ShiroFilterFactoryBean 的  filterChainDefinitionMap 属性配置 bean-->
+		<!-- <property name="filterChainDefinitionMap" ref="filterChainDefinitionMap" /> -->
+		
+		<property name="filterChainDefinitions">
+			<value>
+				/index.jsp = anon
+                /static/** = anon
+                /images/** = anon
+                /index = anon
+                /user/shiro-login = anon
+                
+                /role/** = roles[role]
+				/user/** = roles[user]
+				/chance/** = roles[chance]
+				/plan/** = roles[plan]
+				/dict/** = roles[dict]
+				/product/** = roles[product]
+				/storage/** = roles[storage]
+				/customer/** = roles[customer]
+				/contact/** = roles[customer]
+                /test/** = roles[test]
+                
+                /logout = logout
+                
+                /** = authc
+			</value>
+		</property>
+	</bean>
+</beans>

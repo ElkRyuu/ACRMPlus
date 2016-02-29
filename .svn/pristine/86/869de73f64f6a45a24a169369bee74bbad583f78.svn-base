@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="cn.hlj.crm.dao.UserMapper">
+	<sql id="userConditions">
+		<where>
+			<if test="name !=null and name !=''">
+				name LIKE #{name}
+			</if>
+			<if test="enabled !=null and enabled !=''">
+				AND enabled LIKE #{enabled}
+			</if>
+		</where>
+	</sql>
+
+	<select id="getTotalElementsWithConditions" parameterType="map" resultType="_long">
+		SELECT count(id)
+			FROM users
+			<include refid="userConditions"/>			
+	</select>
+	
+	<select id="getContentWithConditions" parameterType="map" resultType="cn.hlj.crm.entity.User">
+		SELECT * 
+			FROM (
+				SELECT rownum rn,id,name,enabled
+					FROM users
+					<include refid="userConditions"/>
+			) t
+			<![CDATA[
+			WHERE t.rn>=#{firstIndex} AND t.rn<#{endIndex}
+			]]>
+	</select>
+</mapper>

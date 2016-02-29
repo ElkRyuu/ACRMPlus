@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="cn.hlj.crm.dao.ContactMapper">
+	<insert id="save" parameterType="cn.hlj.crm.entity.Contact">
+		INSERT INTO contacts
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			id,
+			<if test="name!=null and name!=''">name,</if>
+			<if test="sex!=null and sex!=''">sex,</if>
+			<if test="position!=null and position!=''">position,</if>
+			<if test="tel!=null and tel!=''">tel,</if>
+			<if test="mobile!=null and mobile!=''">mobile,</if>
+			<if test="memo!=null and memo!=''">memo,</if>
+			<if test="customer!=null and customer!=''">
+				<if test="customer.id!=null and customer.id!=''">customer_id,</if>
+			</if>
+		</trim>
+		<trim prefix=" VALUES(" suffix=")" suffixOverrides=",">
+			crm_seq.nextval,
+			<if test="name!=null and name!=''">#{name},</if>
+			<if test="sex!=null and sex!=''">#{sex},</if>
+			<if test="position!=null and position!=''">#{position},</if>
+			<if test="tel!=null and tel!=''">#{tel},</if>
+			<if test="mobile!=null and mobile!=''">#{mobile},</if>
+			<if test="memo!=null and memo!=''">#{memo},</if>
+			<if test="customer!=null and customer!=''">
+				<if test="customer.id!=null and customer.id!=''">#{customer.id},</if>
+			</if>
+		</trim>
+	</insert>
+</mapper>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<MenuConfig>
+
+	<Displayers>
+		<Displayer name="DropDown"
+			type="net.sf.navigator.displayer.DropDownMenuDisplayer" />
+	</Displayers>
+
+	<Menus>
+		<Menu name="ToDoListMenuFile" title="CRM" description="test" width="50">
+			<Item name="Sales" title="营销管理">
+				<Item name="TDLnewcase" title="营销机会管理" image="images/arrow-right.gif"
+					location="/ACRMPlus/chance/list" />
+				<Item name="TDLnewitem" title="客户开发计划" image="images/arrow-right.gif"
+					location="/ACRMPlus/plan/list" />
+			</Item>
+			<Item name="Cus" title="客户管理">
+				<Item name="TDLopencase" title="客户信息管理" image="images/arrow-right.gif"
+					location="/ACRMPlus/customer/list" />
+				<Item name="TDLopenitem" title="客户流失管理" image="images/arrow-right.gif"
+					location="index.jsp" />
+			</Item>
+			<Item name="Serv" title="服务管理">
+				<Item name="TDLopencase" title="服务创建" image="images/arrow-right.gif"
+					location="/ACRMPlus/service/create" />
+				<Item name="TDLopenitem" title="服务分配" image="images/arrow-right.gif"
+					location="/ACRMPlus/service/allot/list" />
+				<Item name="TDLopencase" title="服务处理" image="images/arrow-right.gif"
+					location="/ACRMPlus/service/deal/list" />
+				<Item name="TDLopenitem" title="服务反馈" image="images/arrow-right.gif"
+					location="/ACRMPlus/service/feedback/list" />
+				<Item name="TDLopenitem" title="服务归档" image="images/arrow-right.gif"
+					location="/ACRMPlus/service/archive/list" />
+			</Item>
+			<Item name="Statistics" title="统计报表">
+				<Item name="TDLopencase" title="客户贡献分析" image="images/arrow-right.gif"
+					location="/ACRMPlus/report/pay" />
+				<Item name="TDLopenitem" title="客户构成分析" image="images/arrow-right.gif"
+					location="/ACRMPlus/report/consist" />
+				<Item name="TDLopencase" title="客户服务分析" image="images/arrow-right.gif"
+					location="/ACRMPlus/report/pay" />
+				<Item name="TDLopenitem" title="客户流失分析" image="images/arrow-right.gif"
+					location="/ACRMPlus/report/pay" />
+			</Item>
+			<Item name="SysAut" title="系统权限管理">
+				<Item name="TDLopencase" title="系统用户管理" image="images/arrow-right.gif"
+					location="/ACRMPlus/user/list" />
+				<Item name="TDLopenitem" title="角色管理" image="images/arrow-right.gif"
+					location="index.jsp" />
+			</Item>
+		</Menu>
+	</Menus>
+
+</MenuConfig>

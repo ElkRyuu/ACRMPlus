@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="cn.hlj.crm.dao.CusServMapper">
+	<sql id="cusServConditions">
+		<where>
+			<if test="matchPageStr !=null and matchPageStr !=''">
+				<if test="matchPageStr =='allot'">
+					allot_id IS NULL
+				</if>
+				<if test="matchPageStr =='deal'">
+					allot_id IS NOT NULL AND deal_date IS NULL
+				</if>
+				<if test="matchPageStr =='feedback'">
+					deal_date IS NOT NULL AND deal_result IS NULL
+				</if>
+				<if test="matchPageStr =='archive'">
+					deal_result IS NOT NULL
+				</if>
+			</if>
+			
+			<if test="serviceType !=null and serviceType !=''">
+				AND service_type LIKE #{serviceType}
+			</if>
+			<if test="serviceTitle !=null and serviceTitle !=''">
+				AND service_title LIKE #{serviceTitle}
+			</if>
+			<if test="customerName !=null and customerName !=''">
+				AND c.name =#{customerName}
+			</if>
+			<if test="fromDate !=null and fromDate !=''">
+				<![CDATA[
+				AND create_date >= #{fromDate}
+				]]>
+			</if>
+			<if test="endDate !=null and endDate !=''">
+				<![CDATA[
+				AND create_date <= #{endDate}
+				]]>
+			</if>
+		</where>
+	</sql>
+
+	<select id="getTotalElements" parameterType="map" resultType="_long">
+		SELECT count(*)
+			FROM (
+				SELECT s.id,c.id
+					FROM customer_services s
+					LEFT OUTER JOIN customers c ON s.customer_id=c.id
+				<include refid="cusServConditions"/>			
+			)
+	</select>
+	
+	<select id="getContent" parameterType="map" resultType="cn.hlj.crm.entity.CustomerService">
+		SELECT * 
+			FROM (
+				SELECT rownum rn,s.id,service_type,service_title,c.name "customer.name",u.name "createdby.name",s.create_date 
+					FROM customer_services s
+					LEFT OUTER JOIN customers c ON s.customer_id=c.id
+					LEFT OUTER JOIN users u ON s.created_id=u.id
+					<include refid="cusServConditions"/>
+			) t
+			<![CDATA[
+			WHERE t.rn>=#{firstIndex} AND t.rn<#{endIndex}
+			]]>
+	</select>
+	
+	<update id="update" parameterType="cn.hlj.crm.entity.CustomerService">
+		UPDATE customer_services
+		<set>
+			<if test="allotDate !=null and allotDate !=''">allot_date=#{allotDate},</if>
+			<if test="allotTo !=null">
+				<if test="allotTo.id !=null and allotTo.id !=''">allot_id=#{allotTo.id},</if>
+			</if>
+			<if test="serviceDeal !=null and serviceDeal !=''">service_deal=#{serviceDeal},</if>
+			<if test="dealDate !=null and dealDate !=''">deal_date=#{dealDate},</if>
+			<if test="dealResult !=null and dealResult !=''">deal_result=#{dealResult},</if>
+			<if test="satisfy !=null and satisfy !=''">satisfy=#{satisfy},</if>
+			
+			<if test="serviceState !=null and serviceState !=''">service_state=#{serviceState}</if>
+		</set>
+		WHERE id=#{id}
+	</update>
+	
+	<select id="get" parameterType="long" resultType="cn.hlj.crm.entity.CustomerService">
+		SELECT s.id,service_type,service_title,c.name "customer.name",service_state,service_request,
+			   uc.name "createdby.name",s.create_date,ua.name "allotTo.name",allot_date,
+			   service_deal,deal_date,deal_result,satisfy
+			FROM customer_services s
+			LEFT OUTER JOIN customers c ON s.customer_id=c.id
+			LEFT OUTER JOIN users uc ON s.created_id=uc.id
+			LEFT OUTER JOIN users ua ON s.allot_id=ua.id
+			WHERE s.id=#{id}
+	</select>
+</mapper>

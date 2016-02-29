@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="cn.hlj.crm.dao.SalesPlanMapper">
+	<insert id="save" parameterType="cn.hlj.crm.entity.SalesPlan">
+		<selectKey order="BEFORE" keyProperty="id" resultType="long">
+			SELECT crm_seq.nextval FROM dual
+		</selectKey>
+		INSERT INTO sales_plan(id,plan_date,todo,chance_id)
+			VALUES(#{id},#{date},#{todo},#{chance.id})
+	</insert>
+	
+	<update id="update" parameterType="cn.hlj.crm.entity.SalesPlan">
+		UPDATE sales_plan 
+			<set>
+				<if test="todo!=null and todo!=''">todo=#{todo},</if>
+				<if test="result!=null and result!=''">plan_result=#{result}</if>
+			</set>
+			WHERE id=#{id}
+	</update>
+</mapper>
